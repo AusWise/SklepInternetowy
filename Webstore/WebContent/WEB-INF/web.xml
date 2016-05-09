@@ -6,6 +6,7 @@
 
    <display-name>Spring MVC Application</display-name>
 
+	
    <servlet>
       <servlet-name>Webstore</servlet-name>
       <servlet-class>
@@ -18,5 +19,7 @@
       <servlet-name>Webstore</servlet-name>
       <url-pattern>/</url-pattern>
    </servlet-mapping>
+   
+  
  
 </web-app>
