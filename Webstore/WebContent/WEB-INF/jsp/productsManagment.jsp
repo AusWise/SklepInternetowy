@@ -14,6 +14,8 @@
 
 		<c:forEach var="product" items="${products}">
 			<tr>
+				<td><jsp:text>${product.ID}</jsp:text>
+				<td>
 				<td><jsp:text>${product.nazwa}</jsp:text>
 				<td>
 				<td><jsp:text>${product.typProduktu}</jsp:text>
@@ -25,12 +27,13 @@
 				<td><jsp:text>${product.cena}</jsp:text>
 				<td>
 				<td><a
-					href="${pageContext.request.contextPath}/cart/add?id=${product.ID}">
-						Add to cart </a></td>
+					href="${pageContext.request.contextPath}/productManagment/edit?id=${product.ID}">
+						edit </a></td>
+				<td><a
+					href="${pageContext.request.contextPath}/productManagment/remove?id=${product.ID}">
+						remove </a></td>
 			</tr>
 		</c:forEach>
 	</table>
-
-
 </body>
 </html>
