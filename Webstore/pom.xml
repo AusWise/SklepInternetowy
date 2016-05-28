@@ -24,9 +24,6 @@
         </configuration>
       </plugin>
     </plugins>
-  
-    
-    
   </build>
   
   <properties>
@@ -37,7 +34,6 @@
 	<spring-data-jpa.version>1.10.1.RELEASE</spring-data-jpa.version>
 	<hibernate.version>5.1.0.Final</hibernate.version>
   </properties>
-  
   
   <dependencies>
   	<dependency>
@@ -101,10 +97,10 @@
     </dependency>
     
     <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-            <version>${hibernate.version}</version>
-        </dependency>
+	    <groupId>org.hibernate</groupId>
+	    <artifactId>hibernate-entitymanager</artifactId>
+	    <version>${hibernate.version}</version>
+	</dependency>
     
   </dependencies>
 </project>
