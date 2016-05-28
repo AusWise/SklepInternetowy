@@ -7,6 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name = "uzytkownicy")
@@ -29,6 +30,7 @@ public class User {
 	private String KodPocztowy;
 	private String login;
 	private String haslo;
+	private String passwordConfirm;
 	
 	
 	@Id
@@ -143,13 +145,26 @@ public class User {
 	public String getLogin() {
 		return login;
 	}
+	
 	public void setLogin(String login) {
 		this.login = login;
 	}
+	
 	public String getHaslo() {
 		return haslo;
 	}
+	
 	public void setHaslo(String haslo) {
 		this.haslo = haslo;
 	}
+	
+	@Transient
+    public String getPasswordConfirm() {
+        return passwordConfirm;
+    }
+
+    public void setPasswordConfirm(String passwordConfirm) {
+        this.passwordConfirm = passwordConfirm;
+    }
+
 }

@@ -2,6 +2,8 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <html>
 
+
+
 <body>
 	<form:form method="POST" modelAttribute="current" class="form-signin">
 		<table>
