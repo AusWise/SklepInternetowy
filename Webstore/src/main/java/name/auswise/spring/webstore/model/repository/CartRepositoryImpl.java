@@ -14,13 +14,13 @@ public class CartRepositoryImpl implements CartRepository {
 	}
 	
 	@Override
-	public void create(long id) {
-		carts.put(id, new Cart());
+	public void save(long id, Cart cart) {
+		carts.put(id, cart);
 		System.out.println("Cart " + id + " created");
 	}
 
 	@Override
-	public Cart get(long id) {
+	public Cart findOne(long id) {
 		System.out.println("Get " + id + " cart");
 		return carts.get(id);
 	}

@@ -19,7 +19,7 @@ public class User {
 	
 	private String Imie;
 	private String Nazwisko;
-	private Long PESEL;
+	private Long pESEL;
 	private Integer NIP;
 	private Integer NumerTelefonu;
 	private String Email;
@@ -71,11 +71,11 @@ public class User {
 	}
 
 	public Long getPESEL() {
-		return PESEL;
+		return pESEL;
 	}
 
 	public void setPESEL(Long pESEL) {
-		PESEL = pESEL;
+		this.pESEL = pESEL;
 	}
 
 	public Integer getNIP() {
@@ -166,5 +166,27 @@ public class User {
     public void setPasswordConfirm(String passwordConfirm) {
         this.passwordConfirm = passwordConfirm;
     }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (ID ^ (ID >>> 32));
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		User other = (User) obj;
+		if (ID != other.ID)
+			return false;
+		return true;
+	}
+    
+    
 
 }

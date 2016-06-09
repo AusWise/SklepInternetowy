@@ -6,4 +6,6 @@ import name.auswise.spring.webstore.model.Payment;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
+	Payment findByNazwa(String nazwa);
+
 }

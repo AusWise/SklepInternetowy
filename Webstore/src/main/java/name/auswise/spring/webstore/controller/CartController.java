@@ -1,8 +1,7 @@
 package name.auswise.spring.webstore.controller;
 
+import java.util.Date;
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -14,7 +13,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import name.auswise.spring.webstore.model.Cart;
 import name.auswise.spring.webstore.model.CartItem;
@@ -24,156 +22,151 @@ import name.auswise.spring.webstore.model.OrderItem;
 import name.auswise.spring.webstore.model.Payment;
 import name.auswise.spring.webstore.model.Product;
 import name.auswise.spring.webstore.model.User;
-import name.auswise.spring.webstore.model.repository.CartRepository;
-import name.auswise.spring.webstore.model.repository.CartRepositoryImpl;
-import name.auswise.spring.webstore.model.repository.DeliveryRepository;
-import name.auswise.spring.webstore.model.repository.OrderItemRepository;
-import name.auswise.spring.webstore.model.repository.OrderRepository;
-import name.auswise.spring.webstore.model.repository.PaymentRepository;
-import name.auswise.spring.webstore.model.repository.ProductRepository;
-import name.auswise.spring.webstore.model.repository.UserRepository;
+import name.auswise.spring.webstore.service.CartService;
+import name.auswise.spring.webstore.service.DeliveryService;
+import name.auswise.spring.webstore.service.OrderItemService;
+import name.auswise.spring.webstore.service.OrderService;
+import name.auswise.spring.webstore.service.PaymentService;
+import name.auswise.spring.webstore.service.ProductService;
+import name.auswise.spring.webstore.service.UserService;
 
 @Controller
 public class CartController {
 	
 	@Autowired
-	ProductRepository productRepository;
+	ProductService productService;
+
+	@Autowired
+	PaymentService paymentService;
 	
 	@Autowired
-	DeliveryRepository deliveryRepository;
+	CartService cartService;
 	
 	@Autowired
-	PaymentRepository paymentRepository;
-	
-	CartRepository cartRepository;
+	OrderService orderService;
 	
 	@Autowired
-	OrderRepository orderRepository;
+	OrderItemService orderItemService;
 	
 	@Autowired
-	OrderItemRepository orderItemRepository;
+	UserService userService;
 	
 	@Autowired
-	UserRepository userRepository;
-	
-	public CartController(){
-		cartRepository = new CartRepositoryImpl();
-	}
+	DeliveryService deliveryService;
 	
 	@RequestMapping(value = "/cart", method = RequestMethod.GET)
-	   public String cart(Model model){
-		   Cart cart = getCurrentUserCart();
-		   model.addAttribute("cart", cart);
-		   
-		   return "cart";
-	   }
-	   
-	   @RequestMapping(value = "/cart/add", method = RequestMethod.GET)
-	   public String addProduct(Long id, Model model){
-		   Cart cart = getCurrentUserCart();
-		   Product product = productRepository.findOne(id);
-		   cart.addProduct(product, 1);
+	public String cart(Model model){
+		Cart cart = cartService.getCurrentUserCart();
+		model.addAttribute("cart", cart);
 		
-		   return "redirect:/cart";
-	   }
+		return "cart";
+	}
 	   
-	   @RequestMapping(value = "/cart/edit", method = RequestMethod.GET)
-	   public String editCartItem(Long id, Model model){
-		   Cart cart = getCurrentUserCart();
-		   CartItem cartItem = cart.getCartItem(id);
-		   model.addAttribute("cartItem", cartItem);
+	@RequestMapping(value = "/cart/add", method = RequestMethod.GET)
+	public String addProduct(Long id, Model model){
+		if(id==null)
+			return "redirect:/cart";
 		
-		   return "editCartItem";
-	   }
+		Cart cart = cartService.getCurrentUserCart();
+		Product product = productService.findOne(id);
+		if(product == null)
+			return "redirect:/cart";
+		
+		for(CartItem cartItem: cart.getCartItems())
+			if(cartItem.getProduct().equals(product))
+				return "redirect:/cart";
+		
+		cart.addProduct(product, 1);
+		
+		return "redirect:/cart";
+	}
 	   
-	   @RequestMapping(value = "/cart/edit", method = RequestMethod.POST)
-	   public String editCartItem(@ModelAttribute("cartItem") CartItem cartItem, BindingResult bindingResult, Model model, HttpServletRequest request){
-		   int id = Integer.parseInt(request.getParameter("id"));
-		   Cart cart = getCurrentUserCart();
+	@RequestMapping(value = "/cart/edit", method = RequestMethod.GET)
+	public String editCartItem(Long id, Model model){
+		if(id==null)
+			return "redirect:/cart";
+		
+		
+		Cart cart = cartService.getCurrentUserCart();
+		
+		CartItem cartItem = cart.getCartItem(id);
+			
+		if(cartItem == null)
+			return "redirect:/cart";
+	
+		model.addAttribute("cartItem", cartItem);
+		
+		return "editCartItem";
+	}
+	
+	@RequestMapping(value = "/cart/edit", method = RequestMethod.POST)
+	public String editCartItem(@ModelAttribute("cartItem") CartItem current, BindingResult bindingResult, Model model){
+		Cart cart = cartService.getCurrentUserCart();
+		
+		Iterable<CartItem> cartItems = cart.getCartItems();
+		for(CartItem cartItem: cartItems)
+			if(cartItem.equals(current))
+				cartItem.setNumber(current.getNumber());
+		
+		return "redirect:/cart";
+	}
+
+	@RequestMapping(value = "/cart/remove", method = RequestMethod.GET)
+	public String removeProduct(Long id, Model model){
+		if(id==null)
+			return "redirect:/cart";
+		
+		Cart cart = cartService.getCurrentUserCart();  
+		try{
+			cart.removeProduct(id);
+		}
+		catch(RuntimeException e){
+			return "redirect:/cart";
+		}
 		   
-		   cart.setNumber(id, cartItem.getNumber());
-		   
-		   return "redirect:/cart";
-	   }
+		return "redirect:/cart";
+	}  
 	   
-	   @RequestMapping(value = "/cart/clear", method = RequestMethod.GET)
-	   public String clearCart(Model model){
-		   Cart cart = getCurrentUserCart();
-		   
-		   cart.clear();
-		   return "redirect:/cart";
-	   }
+	@RequestMapping(value = "/buy", method = RequestMethod.GET)
+	public String buy(Model model){
+		Order order = new Order();
+		model.addAttribute("order", order);
+		
+		List<Delivery> deliveries = deliveryService.findAll();
+		model.addAttribute("deliveries", deliveries);
+		
+		List<Payment> payments = paymentService.findAll();
+		model.addAttribute("payments", payments);
+		
+		return "buy";
+	}
 	   
-	   @RequestMapping(value = "/cart/remove", method = RequestMethod.GET)
-	   public String removeProduct(Long id, Model model){
-		   Cart cart = getCurrentUserCart();
-		   cart.removeProduct(id);
-		   return "redirect:/cart";
-	   }
+	@RequestMapping(value = "/buy", method = RequestMethod.POST)
+	public String buy(@ModelAttribute("order") Order order, BindingResult bindingResult, Model model){
+		User current = getCurrentUser();
+		order.setUser(current);
+		
+		Cart cart = cartService.getCurrentUserCart();
+		
+		if(cart.getCartItems().isEmpty())
+			return "redirect:/cart";
+		
+		order.setOrderItems(cart);
+		order.setData(new Date());
+		
+		orderService.save(order);
+		
+		for(OrderItem orderItem: order.getOrderItems())
+			orderItemService.save(orderItem);
+		
+		return "redirect:/";
+	}
 	   
-	   private Cart getCurrentUserCart(){
-		   User current = getCurrentUser();
-		   long userId = current.getID();
-		   Cart cart = cartRepository.get(userId);
-		   if(cart == null){
-			   cartRepository.create(userId);
-			   cart = cartRepository.get(userId);
-		   }
-		   
-		   return cart;
-	   }
-	   
-	   @RequestMapping(value = "/buy", method = RequestMethod.GET)
-	   public String buy(Model model){
-		   
-		   Order order = new Order();
-		   
-		   model.addAttribute("order", order);
-		   
-		   List<Delivery> deliveries = deliveryRepository.findAll();
-		   model.addAttribute("deliveries", deliveries);
-		   
-		   List<Payment> payments = paymentRepository.findAll();
-		   model.addAttribute("payments", payments);
-		   
-		   return "buy";
-	   }
-	   
-	   @RequestMapping(value = "/buy", method = RequestMethod.POST)
-	   public String buy(
-			   @RequestParam Long delivery, 
-			   @RequestParam Long payment, 
-			   @ModelAttribute("order") Order order, 
-			   BindingResult bindingResult,
-			   Model model){
-		   Delivery wysylka = deliveryRepository.findOne(delivery);
-		   order.setDelivery(wysylka);
-		   
-		   Payment platnosc = paymentRepository.findOne(payment);
-		   order.setPayment(platnosc);
-		   
-		   User current = getCurrentUser();
-		   order.setUser(current);
-		   
-		   Cart cart = getCurrentUserCart();
-		   order.setOrderItems(cart);
-		   
-//		   System.out.println(order.getOrderItems().size());
-		   
-		   orderRepository.save(order);
-		   
-		   for(OrderItem orderItem: order.getOrderItems())
-			   orderItemRepository.save(orderItem);
-		   
-		   return "redirect:/";
-	   }
-	   
-	   private User getCurrentUser(){
-		   SecurityContext context = SecurityContextHolder.getContext();
-		   Authentication authentication = context.getAuthentication();
-		   String login = authentication.getName();
-		   User current = userRepository.findByLogin(login);
-		   
-		   return current;
-	   }
+	private User getCurrentUser(){
+		SecurityContext context = SecurityContextHolder.getContext();
+		Authentication authentication = context.getAuthentication();
+		String login = authentication.getName();
+		User current = userService.findByLogin(login);
+		return current;
+	}
 }

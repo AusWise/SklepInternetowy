@@ -6,4 +6,6 @@ import name.auswise.spring.webstore.model.Delivery;
 
 public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
 
+	Delivery findByNazwa(String nazwa);
+
 }

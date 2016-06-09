@@ -11,6 +11,7 @@ import javax.persistence.Table;
 public class Delivery {
 	private Long ID;
 	private String nazwa;
+	private double cena;
 	
 	@Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -30,6 +31,14 @@ public class Delivery {
 		this.nazwa = nazwa;
 	}
 	
+	public double getCena() {
+		return cena;
+	}
+
+	public void setCena(double cena) {
+		this.cena = cena;
+	}
+
 	@Override
 	public String toString() {
 		return nazwa;

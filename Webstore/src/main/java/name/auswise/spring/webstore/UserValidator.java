@@ -10,6 +10,7 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 import name.auswise.spring.webstore.model.User;
+import name.auswise.spring.webstore.service.UserService;
 
 @Component
 public class UserValidator implements Validator {
@@ -53,7 +54,7 @@ public class UserValidator implements Validator {
 			return;
         
         if(!validateEmail(user.getEmail()))
-        	errors.rejectValue("Email", "BadEmail");
+        	errors.rejectValue("Email", "Invalid.user.email");
         
 //        if(!validatePesel(String.valueOf(user.getPESEL())))
 //        	errors.rejectValue("PESEL", "BadPesel");
@@ -61,25 +62,20 @@ public class UserValidator implements Validator {
         if(errors.hasErrors())
 			return;
         
+        User other;
         
-        if (userService.findByLogin(user.getLogin()) != null) {
+        other = userService.findByLogin(user.getLogin());
+        if (other != null && !other.equals(user)) {
             errors.rejectValue("login", "Duplicate.user.login");
         }
         
-        if (userService.findByLogin(user.getLogin()) != null) {
-            errors.rejectValue("PESEL", "Duplicate.user.pesel");
-        }
-        
-        if (userService.findByEmail(user.getEmail()) != null) {
-            errors.rejectValue("Email", "Duplicate.user.Email");
+        other = userService.findByEmail(user.getEmail());
+        if (other != null && !other.equals(user)) {
+            errors.rejectValue("Email", "Duplicate.user.email");
         }
         
         if(errors.hasErrors())
 			return;
-        
-        if (!user.getPasswordConfirm().equals(user.getHaslo())) {
-            errors.rejectValue("passwordConfirm", "Diff.user.passwordConfirm");
-        }
 	}
 
 	private boolean validateEmail(final String email) {
@@ -92,6 +88,4 @@ public class UserValidator implements Validator {
 		PeselValidator peselValidator = new PeselValidator(pesel);
 		return peselValidator.isValid();
 	}
-	
-	
 }

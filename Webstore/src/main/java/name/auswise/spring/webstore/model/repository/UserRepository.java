@@ -7,4 +7,5 @@ import name.auswise.spring.webstore.model.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 	User findByLogin(String login);
 	User findByEmail(String email);
+//	User findByPESEL(Long pesel);
 }

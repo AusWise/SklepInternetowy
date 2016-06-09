@@ -1,13 +1,19 @@
 package name.auswise.spring.webstore.model;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class Cart {
-	private List<CartItem> cartItems;
+	private Set<CartItem> cartItems;
 	
 	public Cart(){
-		cartItems = new LinkedList<CartItem>();
+		cartItems = new HashSet<CartItem>();
 	}
 	
 	public void addProduct(Product product, int number){
@@ -54,7 +60,7 @@ public class Cart {
 		cartItems.clear();
 	}
 	
-	public List<CartItem> getCartItems(){
+	public Collection<CartItem> getCartItems(){
 		return cartItems;
 	}
 	
@@ -65,4 +71,20 @@ public class Cart {
 		
 		return null;
 	}
+	
+	public double getTotal(){
+		double subTotal = 0;
+		for(CartItem cartItem: getCartItems())
+			subTotal += cartItem.getTotal();
+		
+		return subTotal;
+	}
+
+	
+
+	
+	
+	
+	
+	
 }
