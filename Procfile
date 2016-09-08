@@ -1,1 +1,1 @@
-web: sh target/Webstore
+web: sh target/bin/Webstore
